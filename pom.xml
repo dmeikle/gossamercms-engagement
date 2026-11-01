@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>gossamercms-subscribers</module>
+        <module>gossamercms-events</module>
     </modules>
 
     <properties>
