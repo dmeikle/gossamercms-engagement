@@ -1,0 +1,20 @@
+CREATE TABLE newsletter_subscriptions (
+    "id" UUID PRIMARY KEY,
+    "subscriberId" UUID,
+    "newsletterId" UUID,
+    "status" VARCHAR(30),
+    "consentType" VARCHAR(20),
+    "consentedAt" TIMESTAMP WITH TIME ZONE,
+    "consentSource" VARCHAR(255),
+    "consentText" VARCHAR,
+    "subscribedAt" TIMESTAMP WITH TIME ZONE,
+    "confirmedAt" TIMESTAMP WITH TIME ZONE,
+    "unsubscribedAt" TIMESTAMP WITH TIME ZONE,
+    "confirmationToken" VARCHAR(255),
+    "confirmationTokenExpiresAt" TIMESTAMP WITH TIME ZONE,
+    "ipAddress" VARCHAR(45),
+    "userAgent" VARCHAR,
+    "deletedAt" TIMESTAMP WITH TIME ZONE,
+    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
