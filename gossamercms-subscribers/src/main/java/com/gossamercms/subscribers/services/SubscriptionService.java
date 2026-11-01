@@ -3,6 +3,7 @@ package com.gossamercms.subscribers.services;
 
 import com.gossamercms.mvc.annotations.ModuleService;
 import com.gossamercms.mvc.data.ListResultset;
+import com.gossamercms.mvc.data.QueryFilter;
 import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.subscribers.dtos.NewsletterDto;
 import com.gossamercms.subscribers.dtos.NewsletterSubscriberDto;
@@ -20,6 +21,7 @@ import com.gossamercms.subscribers.dtos.NewsletterSubscriptionDto;
 import com.gossamercms.outbox.services.OutboxService;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 @ModuleService
@@ -106,7 +108,10 @@ public class SubscriptionService {
     public ListResultset<NewsletterSubscriptionListResponse> getSubscriptionList(String email) {
         ListResultset<NewsletterSubscriptionListResponse> result =
                 newsletterSubscriptionsDbService.getSubscriptionList(QueryOptions.builder()
-                        .filters(Map.of("email", email))
+                        .filters(Map.of("nsub.email", email))
+                                .queryFilters(List.of(
+                                        new QueryFilter("consentedAt", QueryFilter.Operator.IS_NOT_NULL, null)
+                                ))
                         .build());
         return result;
     }

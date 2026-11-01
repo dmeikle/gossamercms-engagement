@@ -88,6 +88,7 @@ public class SendSubscriptionTokenListener
                         .confirmationToken(dtoWithToken.getConfirmationToken())
                         .build(),
                 Map.of("id", event.getNewsletterSubscription().getId()));
+
         notificationJobService.createReminderJob(
                 NotificationRequest.builder()
                         .createdBy(SystemPrincipal.ID)

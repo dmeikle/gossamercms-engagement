@@ -39,14 +39,17 @@ public class NewsletterSubscriptionsDbService extends BaseDbService<NewsletterSu
 
     public ListResultset<NewsletterSubscriptionListResponse> getSubscriptionList(QueryOptions options) {
         String sql = """
-                select ns.id as "newsletterId", ns.name as "newsletterName",
-                ns.id as "subscriptionId", ns.status as "subscriptionStatus" from newsletter_subscriptions ns
-                inner join newsletters n on n.id = ns."newsletterId"
+                select n.id as "newsletterId", n.name as "newsletterName",
+                       ns.id as "subscriptionId", ns.status as "subscriptionStatus"
+                from newsletter_subscriptions ns
+                       inner join newsletters n on n.id = ns."newsletterId"
+                       inner join newsletter_subscribers nsub on nsub.id = ns."subscriberId"
                 /*WHERE_CLAUSE*/
                 """;
         String countSql = """
                 select count(*) from newsletter_subscriptions ns
                 inner join newsletters n on n.id = ns."newsletterId"
+                inner join newsletter_subscribers nsub on nsub.id = ns."subscriberId"
                 /*WHERE_CLAUSE*/
                 """;
         DataSourceAdapter ds = dsManager.get(meta.datasourceKey());

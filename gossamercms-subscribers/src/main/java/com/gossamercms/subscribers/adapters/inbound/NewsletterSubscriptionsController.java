@@ -41,7 +41,7 @@ public class NewsletterSubscriptionsController extends BaseController<Newsletter
     }
 
     @GetMapping("/confirm/{token}")
-    public ApiResponse<NewsletterSubscriptionDto> confirmSubscription(@PathVariable String token) {
+    public ApiResponse<NewsletterSubscriptionDto> confirmSubscription(@PathVariable("token") String token) {
         NewsletterSubscriptionDto newsletterSubscription = handler.get(
                 Map.of("confirmationToken", token));
 
