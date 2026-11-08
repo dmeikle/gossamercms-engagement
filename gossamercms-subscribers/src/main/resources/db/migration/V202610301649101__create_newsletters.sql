@@ -3,7 +3,7 @@ CREATE TABLE newsletters (
     "name" VARCHAR(150),
     "description" VARCHAR(500),
     "isActive" BOOLEAN,
-    "deletedAt" TIMESTAMP WITH TIME ZONE,
-    "createdAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    "updatedAt" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    "deletedAt" TIMESTAMP,
+    "createdAt" TIMESTAMP DEFAULT NOW(),
+    "updatedAt" TIMESTAMP DEFAULT NOW()
 );
