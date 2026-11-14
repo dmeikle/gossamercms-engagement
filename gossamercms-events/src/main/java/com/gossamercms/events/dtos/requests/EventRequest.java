@@ -26,4 +26,5 @@ public class EventRequest {
     private Instant registrationEndAt;
     private Boolean isFeatured;
     private Boolean isPublished;
+    private EventLocationRequest location;
 }

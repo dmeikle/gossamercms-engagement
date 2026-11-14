@@ -31,13 +31,13 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/contact-submissions")
-public class ContactSubmissionsController extends TypedBaseController<ContactSubmission, ContactSubmissionDto, ContactSubmissionRequest, ContactSubmissionResponse> {
+public class ContactSubmissionsController extends TypedBaseController<ContactSubmission, ContactSubmissionDto, ContactSubmissionRequest, ContactSubmissionResponse, ContactSubmissionResponse> {
 
     private final ContactFormEmailService contactFormEmailService;
 
     public ContactSubmissionsController(ContactSubmissionsHandler handler,
                                         ContactFormEmailService contactFormEmailService) {
-        super(handler);
+        super(handler, ContactSubmissionResponse.class);
         this.contactFormEmailService = contactFormEmailService;
     }
 

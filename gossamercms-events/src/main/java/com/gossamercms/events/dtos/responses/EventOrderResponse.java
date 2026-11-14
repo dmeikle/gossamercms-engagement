@@ -15,5 +15,5 @@ public record EventOrderResponse(UUID id, UUID eventId, String orderNumber, Stri
                 dto.getTotal(), dto.getStatus(), dto.getExpiresAt(), dto.getPaidAt(), dto.getCancelledAt(), items);
     }
 
-    public record Item(UUID ticketTypeId, int quantity, BigDecimal unitPrice, BigDecimal lineTotal) {}
+    public record Item(UUID id, UUID ticketTypeId, int quantity, BigDecimal unitPrice, BigDecimal lineTotal) {}
 }

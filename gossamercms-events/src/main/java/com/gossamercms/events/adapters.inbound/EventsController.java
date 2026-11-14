@@ -5,6 +5,7 @@ import com.gossamercms.events.dtos.EventDto;
 import com.gossamercms.events.dtos.requests.EventRequest;
 import com.gossamercms.events.dtos.requests.EventUpdateRequest;
 import com.gossamercms.events.dtos.responses.EventListDto;
+import com.gossamercms.events.dtos.responses.EventListResponse;
 import com.gossamercms.events.dtos.responses.EventResponse;
 import com.gossamercms.events.handlers.EventsHandler;
 import com.gossamercms.events.models.Event;
@@ -22,10 +23,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/events")
 public class EventsController extends TypedBaseController<
-        Event, EventDto, EventRequest, EventResponse> {
+        Event, EventDto, EventRequest, EventResponse, EventListResponse> {
 
     public EventsController(EventsHandler handler) {
-        super(handler);
+        super(handler, EventListResponse.class);
     }
 
     @Override
@@ -73,12 +74,12 @@ public class EventsController extends TypedBaseController<
 
 
     @GetMapping
-    public ApiResponse<ListResultset<EventListDto>> getAllEvents(
+    public ApiResponse<ListResultset<EventListResponse>> getAllEvents(
             @CurrentUser CurrentJwtUser jwtUser,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "50") int size,
             @RequestParam Map<String, Object> params) {
-        return ApiResponse.ok(_getAll(jwtUser, page, size, params, EventListDto.class));
+        return ApiResponse.ok(_getAll(jwtUser, page, size, params, EventListResponse.class));
     }
 
     @GetMapping("/{event}")

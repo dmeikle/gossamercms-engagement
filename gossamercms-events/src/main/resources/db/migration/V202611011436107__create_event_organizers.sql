@@ -18,7 +18,7 @@ CREATE TABLE event_organizers (
     "createdAt" TIMESTAMP DEFAULT NOW(),
     "updatedAt" TIMESTAMP DEFAULT NOW(),
     CONSTRAINT "fk_event_organizers_organizationId" FOREIGN KEY ("organizationId") REFERENCES "organizations" ("id"),
-    CONSTRAINT "fk_event_organizers_createdBy" FOREIGN KEY ("createdBy") REFERENCES "users" ("id")
+    CONSTRAINT "fk_event_organizers_createdBy" FOREIGN KEY ("createdBy") REFERENCES "user_contexts" ("id")
 );
 CREATE INDEX "idx_event_organizers_organizationId" ON "event_organizers" ("organizationId");
 CREATE INDEX "idx_event_organizers_createdBy" ON "event_organizers" ("createdBy");

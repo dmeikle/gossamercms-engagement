@@ -23,10 +23,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/event-categories")
-public class EventCategoriesController extends TypedBaseController<EventCategory, EventCategoryDto, EventCategoryRequest, EventCategoryResponse> {
+public class EventCategoriesController extends TypedBaseController<EventCategory, EventCategoryDto, EventCategoryRequest, EventCategoryResponse, EventCategoryResponse> {
 
     public EventCategoriesController(EventCategorysHandler handler) {
-        super(handler);
+        super(handler, EventCategoryResponse.class);
     }
 
 

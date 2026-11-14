@@ -13,6 +13,5 @@ CREATE TABLE organizations (
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT NOW(),
     "updatedAt" TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT "fk_organizations_createdBy" FOREIGN KEY ("createdBy") REFERENCES "users" ("id")
+    CONSTRAINT "fk_organizations_createdBy" FOREIGN KEY ("createdBy") REFERENCES "user_contexts" ("id")
 );
-CREATE INDEX "idx_organizations_createdBy" ON "organizations" ("createdBy");

@@ -23,12 +23,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/contact-forms")
-public class ContactFormsController extends TypedBaseController<ContactForm, ContactFormDto, ContactFormRequest, ContactFormResponse> {
+public class ContactFormsController extends TypedBaseController<ContactForm, ContactFormDto, ContactFormRequest, ContactFormResponse, ContactFormResponse> {
 
     private final ContactFormFieldsHandler contactFormFieldsHandler;
 
     public ContactFormsController(ContactFormsHandler handler, ContactFormFieldsHandler contactFormFieldsHandler) {
-        super(handler);
+        super(handler, ContactFormResponse.class);
         this.contactFormFieldsHandler = contactFormFieldsHandler;
     }
 

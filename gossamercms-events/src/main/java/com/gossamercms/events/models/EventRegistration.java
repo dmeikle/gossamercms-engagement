@@ -22,7 +22,7 @@ public class EventRegistration implements BaseModel{
     private UUID eventId;
     private UUID orderId;
     private UUID orderItemId;
-    private UUID userId;
+    private UUID userContextId;
     private String attendeeFirstName;
     private String attendeeLastName;
     private String attendeeEmail;
@@ -39,7 +39,7 @@ public class EventRegistration implements BaseModel{
             .eventId(eventId)
             .orderId(orderId)
             .orderItemId(orderItemId)
-            .userId(userId)
+            .userContextId(userContextId)
             .attendeeFirstName(attendeeFirstName)
             .attendeeLastName(attendeeLastName)
             .attendeeEmail(attendeeEmail)
@@ -58,7 +58,7 @@ public static final ModelMeta META = ModelMeta.builderWithId("event_registration
     .column("eventId", UUID.class)
     .column("orderId", UUID.class)
     .column("orderItemId", UUID.class)
-    .column("userId", UUID.class)
+    .column("userContextId", UUID.class)
     .column("attendeeFirstName", String.class, 100)
     .column("attendeeLastName", String.class, 100)
     .column("attendeeEmail", String.class, 255)

@@ -17,10 +17,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-tickets")
 public class EventTicketsController extends TypedBaseController<
-        EventTicket, EventTicketDto, EventTicketRequest, EventTicketResponse> {
+        EventTicket, EventTicketDto, EventTicketRequest, EventTicketResponse, EventTicketResponse> {
 
     public EventTicketsController(EventTicketsHandler handler) {
-        super(handler);
+        super(handler, EventTicketResponse.class);
     }
 
     @Override
@@ -58,6 +58,7 @@ public class EventTicketsController extends TypedBaseController<
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "50") int size,
             @RequestParam Map<String, Object> params) {
+
         return ApiResponse.ok(_getAll(jwtUser, page, size, params));
     }
 

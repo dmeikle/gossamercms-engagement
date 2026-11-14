@@ -27,7 +27,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/event-organizers")
 public class EventOrganizersController extends TypedBaseController<
-        EventOrganizer, EventOrganizerDto, EventOrganizerRequest, EventOrganizerResponse> {
+        EventOrganizer, EventOrganizerDto, EventOrganizerRequest, EventOrganizerResponse, EventOrganizerResponse> {
 
     private final EventOrganizerMembersHandler eventOrganizerMembersHandler;
     private final EventsHandler eventsHandler;
@@ -35,7 +35,7 @@ public class EventOrganizersController extends TypedBaseController<
     public EventOrganizersController(EventOrganizersHandler handler,
                                      EventOrganizerMembersHandler eventOrganizerMembersHandler,
                                      EventsHandler eventsHandler) {
-        super(handler);
+        super(handler, EventOrganizerResponse.class);
         this.eventOrganizerMembersHandler = eventOrganizerMembersHandler;
         this.eventsHandler = eventsHandler;
     }

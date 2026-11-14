@@ -18,7 +18,7 @@ public class AdminEventTicketTypeRequest {
     private UUID sessionId;
     private String name;
     private String description;
-    private String ticketType;
+    private UUID ticketTypeId;
     private BigDecimal price;
     private String currency;
     private Integer quantityAvailable;

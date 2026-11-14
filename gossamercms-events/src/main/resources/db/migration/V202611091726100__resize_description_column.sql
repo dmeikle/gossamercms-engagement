@@ -1,0 +1,1 @@
+alter table events alter column description type text;

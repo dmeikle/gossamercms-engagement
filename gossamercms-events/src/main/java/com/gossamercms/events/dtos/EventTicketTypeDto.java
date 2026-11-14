@@ -21,7 +21,7 @@ public class EventTicketTypeDto implements DtoWithId{
     private UUID sessionId;
     private String name;
     private String description;
-    private String ticketType;
+    private UUID ticketTypeId;
     private BigDecimal price;
     private String currency;
     private Integer quantityAvailable;
@@ -45,7 +45,7 @@ public class EventTicketTypeDto implements DtoWithId{
             .sessionId(sessionId)
             .name(name)
             .description(description)
-            .ticketType(ticketType)
+            .ticketTypeId(ticketTypeId)
             .price(price)
             .currency(currency)
             .quantityAvailable(quantityAvailable)
@@ -64,3 +64,14 @@ public class EventTicketTypeDto implements DtoWithId{
             .build();
     }
 }
+/*
+RE: name field
+An organizer creates an event called Vancouver Summer Music Festival and configures these offerings:
+Event ticket name	Global ticket type	Price
+Friday General Admission	General Admission	$50
+Weekend VIP Pass	VIP	$150
+Student Weekend Pass	Student	$75
+Early Bird Weekend Pass	General Admission	$35
+
+Notice that Early Bird Weekend Pass uses the General Admission global type but has its own event-specific name and price.
+ */

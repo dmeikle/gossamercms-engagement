@@ -17,10 +17,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-waitlists")
 public class EventWaitlistsController extends TypedBaseController<
-        EventWaitlist, EventWaitlistDto, EventWaitlistRequest, EventWaitlistResponse> {
+        EventWaitlist, EventWaitlistDto, EventWaitlistRequest, EventWaitlistResponse, EventWaitlistResponse> {
 
     public EventWaitlistsController(EventWaitlistsHandler handler) {
-        super(handler);
+        super(handler, EventWaitlistResponse.class);
     }
 
     @Override

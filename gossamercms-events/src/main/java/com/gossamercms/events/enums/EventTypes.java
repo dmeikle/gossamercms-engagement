@@ -1,0 +1,25 @@
+package com.gossamercms.events.enums;
+
+public enum EventTypes {
+    CONFERENCE,
+    WORKSHOP,
+    SEMINAR,
+    WEBINAR,
+    MEETUP,
+    SOCIAL_EVENT,
+    NETWORKING_EVENT,
+    FUNDRAISER,
+    TRADE_SHOW,
+    EXHIBITION,
+    FESTIVAL,
+    COMPETITION,
+    AWARDS_CEREMONY,
+    PRODUCT_LAUNCH,
+    PRESS_CONFERENCE,
+    PANEL_DISCUSSION,
+    Q_AND_A_SESSION,
+    TRAINING_SESSION,
+    TEAM_BUILDING_EVENT,
+    RETREAT,
+    OTHER
+}

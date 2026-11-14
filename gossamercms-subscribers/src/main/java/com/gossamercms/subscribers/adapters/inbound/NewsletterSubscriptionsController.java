@@ -22,13 +22,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/newsletter-subscriptions")
-public class NewsletterSubscriptionsController extends TypedBaseController<NewsletterSubscription, NewsletterSubscriptionDto, NewsletterSubscriptionRequest, NewsletterSubscriptionResponse> {
+public class NewsletterSubscriptionsController extends TypedBaseController<NewsletterSubscription, NewsletterSubscriptionDto, NewsletterSubscriptionRequest, NewsletterSubscriptionResponse, NewsletterSubscriptionResponse> {
 
     private final SubscriptionService subscriptionService;
 
     public NewsletterSubscriptionsController(NewsletterSubscriptionsHandler handler,
                                                 SubscriptionService subscriptionService) {
-        super(handler);
+        super(handler, NewsletterSubscriptionResponse.class);
         this.subscriptionService = subscriptionService;
     }
 

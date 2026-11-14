@@ -18,8 +18,11 @@ CREATE TABLE event_ticket_types (
     "sortOrder" INTEGER,
     "isVisible" BOOLEAN,
     "deletedAt" TIMESTAMP,
+    "deletedBy" UUID,
     "createdAt" TIMESTAMP DEFAULT NOW(),
+    "createdBy" UUID,
     "updatedAt" TIMESTAMP DEFAULT NOW(),
+    "updatedBy" UUID,
     CONSTRAINT "fk_event_ticket_types_eventId" FOREIGN KEY ("eventId") REFERENCES "events" ("id"),
     CONSTRAINT "fk_event_ticket_types_sessionId" FOREIGN KEY ("sessionId") REFERENCES "event_sessions" ("id")
 );

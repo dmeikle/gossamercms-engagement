@@ -45,6 +45,7 @@ class PublicEventControllersTest {
         assertEquals(TypedBaseController.class, type.getSuperclass());
         var types = ((ParameterizedType) type.getGenericSuperclass()).getActualTypeArguments();
         Class<?> dtoType = (Class<?>) types[1];
+        Class<?> responseListType = (Class<?>) types[4];
         Object dto = dtoType.getConstructor().newInstance();
         UUID id = UUID.randomUUID();
         dtoType.getMethod("setId", UUID.class).invoke(dto, id);
@@ -56,8 +57,11 @@ class PublicEventControllersTest {
         var constructor = type.getConstructors()[0];
         Object dependency = mock(constructor.getParameterTypes()[0]);
         var handler = (BaseHandler<?, ?>) dependency;
-        doReturn(ListResultset.of(List.of(dto), 2, 10, 1))
-                .when(handler).getAll(any(QueryOptions.class));
+        Object listResponseBuilder = responseListType.getMethod("builder").invoke(null);
+        listResponseBuilder.getClass().getMethod("id", UUID.class).invoke(listResponseBuilder, id);
+        Object listResponse = listResponseBuilder.getClass().getMethod("build").invoke(listResponseBuilder);
+        doReturn(ListResultset.of(List.of(listResponse), 2, 10, 1))
+                .when(handler).getAll(any(QueryOptions.class), eq(responseListType));
         Object controller = constructor.newInstance(dependency);
 
         var conversion = new DefaultFormattingConversionService();
@@ -94,7 +98,7 @@ class PublicEventControllersTest {
                 .andExpect(jsonPath("$.data.list[0].createdAt").doesNotExist())
                 .andExpect(jsonPath("$.data.list[0].qrTokenHash").doesNotExist());
         var options = ArgumentCaptor.forClass(QueryOptions.class);
-        verify(handler).getAll(options.capture());
+        verify(handler).getAll(options.capture(), eq(responseListType));
         assertEquals(2, options.getValue().page());
         assertEquals(10, options.getValue().size());
         assertEquals(Map.of("status", "active"), options.getValue().filters());

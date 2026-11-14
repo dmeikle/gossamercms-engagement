@@ -1,14 +1,20 @@
 package com.gossamercms.events.adapters.inbound;
 
 
+import com.gossamercms.events.dtos.EventDto;
 import com.gossamercms.events.dtos.EventTicketTypeDto;
 import com.gossamercms.events.dtos.responses.AdminEventTicketTypeResponse;
 import com.gossamercms.events.dtos.requests.AdminEventTicketTypeRequest;
+import com.gossamercms.events.dtos.responses.EventTicketTypeResponse;
 import com.gossamercms.events.handlers.EventTicketTypesHandler;
 import com.gossamercms.events.models.EventTicketType;
 import com.gossamercms.mvc.controllers.BaseController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.gossamercms.mvc.data.ListResultset;
+import com.gossamercms.mvc.data.QueryOptions;
+import com.gossamercms.mvc.http.ApiResponse;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -26,7 +32,7 @@ public class AdminEventTicketTypesController extends BaseController<EventTicketT
                 .sessionId(request.getSessionId())
                 .name(request.getName())
                 .description(request.getDescription())
-                .ticketType(request.getTicketType())
+                .ticketTypeId(request.getTicketTypeId())
                 .price(request.getPrice())
                 .currency(request.getCurrency())
                 .quantityAvailable(request.getQuantityAvailable())
@@ -50,7 +56,7 @@ public class AdminEventTicketTypesController extends BaseController<EventTicketT
                 .sessionId(dto.getSessionId())
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .ticketType(dto.getTicketType())
+                .ticketTypeId(dto.getTicketTypeId())
                 .price(dto.getPrice())
                 .currency(dto.getCurrency())
                 .quantityAvailable(dto.getQuantityAvailable())
@@ -66,4 +72,10 @@ public class AdminEventTicketTypesController extends BaseController<EventTicketT
                 .build();
     }
 
+    @GetMapping("{event}/list-types")
+    public ApiResponse<ListResultset<EventTicketTypeResponse>> listTypes(@PathVariable(name = "event") EventDto event) {
+        ListResultset<EventTicketTypeResponse> types = this.handler.getAll(QueryOptions.builder().filters(Map.of("eventId", event.getId())).build()
+        , EventTicketTypeResponse.class);
+        return ApiResponse.ok(types);
+    }
 }

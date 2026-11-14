@@ -16,7 +16,7 @@ import java.util.UUID;
 public class AdminEventOrderRequest {
     private UUID eventId;
     private String orderNumber;
-    private UUID purchaserUserId;
+    private UUID purchaserUserContextId;
     private String purchaserName;
     private String purchaserEmail;
     private String currency;

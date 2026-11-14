@@ -20,6 +20,5 @@ CREATE TABLE events (
     "deletedAt" TIMESTAMP,
     "createdAt" TIMESTAMP DEFAULT NOW(),
     "updatedAt" TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT "fk_events_createdBy" FOREIGN KEY ("createdBy") REFERENCES "users" ("id")
+    CONSTRAINT "fk_events_createdBy" FOREIGN KEY ("createdBy") REFERENCES "user_contexts" ("id")
 );
-CREATE INDEX "idx_events_createdBy" ON "events" ("createdBy");

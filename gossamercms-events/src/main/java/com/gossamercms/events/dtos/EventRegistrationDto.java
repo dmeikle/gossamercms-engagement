@@ -20,7 +20,7 @@ public class EventRegistrationDto implements DtoWithId{
     private UUID eventId;
     private UUID orderId;
     private UUID orderItemId;
-    private UUID userId;
+    private UUID userContextId;
     private String attendeeFirstName;
     private String attendeeLastName;
     private String attendeeEmail;
@@ -37,7 +37,7 @@ public class EventRegistrationDto implements DtoWithId{
             .eventId(eventId)
             .orderId(orderId)
             .orderItemId(orderItemId)
-            .userId(userId)
+            .userContextId(userContextId)
             .attendeeFirstName(attendeeFirstName)
             .attendeeLastName(attendeeLastName)
             .attendeeEmail(attendeeEmail)

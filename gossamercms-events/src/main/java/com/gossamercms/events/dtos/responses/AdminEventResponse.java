@@ -1,13 +1,18 @@
 package com.gossamercms.events.dtos.responses;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AdminEventResponse {
     private UUID id;
     private String title;
@@ -26,4 +31,7 @@ public class AdminEventResponse {
     private Instant registrationEndAt;
     private Boolean isFeatured;
     private Boolean isPublished;
+    private EventLocationResponse location;
+    private List<EventTicketTypeResponse> eventTicketTypes;
+
 }

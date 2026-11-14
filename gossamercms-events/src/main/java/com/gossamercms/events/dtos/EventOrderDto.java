@@ -19,7 +19,7 @@ public class EventOrderDto implements DtoWithId{
     private UUID id;
     private UUID eventId;
     private String orderNumber;
-    private UUID purchaserUserId;
+    private UUID purchaserUserContextId;
     private String purchaserName;
     private String purchaserEmail;
     private String currency;
@@ -41,7 +41,7 @@ public class EventOrderDto implements DtoWithId{
             .id(id)
             .eventId(eventId)
             .orderNumber(orderNumber)
-            .purchaserUserId(purchaserUserId)
+            .purchaserUserContextId(purchaserUserContextId)
             .purchaserName(purchaserName)
             .purchaserEmail(purchaserEmail)
             .currency(currency)

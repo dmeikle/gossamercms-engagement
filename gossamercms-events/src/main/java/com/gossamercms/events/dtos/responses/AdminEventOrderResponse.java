@@ -13,7 +13,7 @@ public class AdminEventOrderResponse {
     private UUID id;
     private UUID eventId;
     private String orderNumber;
-    private UUID purchaserUserId;
+    private UUID purchaserUserContextId;
     private String purchaserName;
     private String purchaserEmail;
     private String currency;

@@ -23,7 +23,7 @@ public class EventTicketType implements BaseModel{
     private UUID sessionId;
     private String name;
     private String description;
-    private String ticketType;
+    private UUID ticketTypeId;
     private BigDecimal price;
     private String currency;
     private Integer quantityAvailable;
@@ -47,7 +47,7 @@ public class EventTicketType implements BaseModel{
             .sessionId(sessionId)
             .name(name)
             .description(description)
-            .ticketType(ticketType)
+            .ticketTypeId(ticketTypeId)
             .price(price)
             .currency(currency)
             .quantityAvailable(quantityAvailable)
@@ -73,7 +73,7 @@ public static final ModelMeta META = ModelMeta.builderWithId("event_ticket_types
     .column("sessionId", UUID.class)
     .column("name", String.class, 255)
     .column("description", String.class)
-    .column("ticketType", String.class)
+    .column("ticketTypeId", UUID.class)
     .column("price", BigDecimal.class)
     .column("currency", String.class, 3)
     .column("quantityAvailable", Integer.class)

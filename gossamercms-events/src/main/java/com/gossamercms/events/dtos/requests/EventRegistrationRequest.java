@@ -16,7 +16,7 @@ public class EventRegistrationRequest {
     private UUID eventId;
     private UUID orderId;
     private UUID orderItemId;
-    private UUID userId;
+    private UUID userContextId;
     private String attendeeFirstName;
     private String attendeeLastName;
     private String attendeeEmail;

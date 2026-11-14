@@ -49,6 +49,18 @@ public class EventTicketTypesDbService extends BaseDbService<EventTicketType, Ev
         if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Inventory needs reconciliation");
     }
 
+    public void completeReservation(UUID id, int quantity) {
+        int changed = jdbc().update("""
+                UPDATE event_ticket_types
+                SET "quantityReserved"=COALESCE("quantityReserved",0)-:quantity,
+                    "quantitySold"=COALESCE("quantitySold",0)+:quantity,
+                    "updatedAt"=CURRENT_TIMESTAMP
+                WHERE "id"=:id AND COALESCE("quantityReserved",0)>=:quantity
+                  AND COALESCE("quantitySold",0)<=2147483647-:quantity
+                """, Map.of("id", id, "quantity", quantity));
+        if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Inventory needs reconciliation");
+    }
+
     @Override
     protected EventTicketType mapToEntity(EventTicketTypeDto dto) {
         return dto.toEntity();

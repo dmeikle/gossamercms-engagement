@@ -6,9 +6,11 @@ import com.gossamercms.events.dtos.responses.AdminEventResponse;
 import com.gossamercms.events.dtos.requests.EventRequest;
 import com.gossamercms.events.handlers.EventsHandler;
 import com.gossamercms.events.models.Event;
+import com.gossamercms.events.services.EventsService;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.controllers.BaseController;
 import com.gossamercms.mvc.http.ApiResponse;
+import com.gossamercms.mvc.jwt.CurrentJwtUser;
 import com.gossamercms.security.jwt.JwtUser;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/events")
 public class AdminEventsController extends BaseController<Event, EventDto, EventRequest, AdminEventResponse, AdminEventResponse> {
 
-    public AdminEventsController(EventsHandler handler) {
+    private final EventsService eventsService;
+
+    public AdminEventsController(EventsHandler handler, EventsService eventsService) {
         super(handler, AdminEventResponse.class);
+        this.eventsService = eventsService;
     }
 
     @Override
@@ -96,4 +101,29 @@ public class AdminEventsController extends BaseController<Event, EventDto, Event
                         .build()));
     }
 
+    @PutMapping("/{event}/details")
+    public ApiResponse<AdminEventResponse> updateDetails(
+            @CurrentUser CurrentJwtUser jwtUser,
+            @PathVariable("event") EventDto existing,
+            @RequestBody EventRequest request) {
+
+        return ApiResponse.ok(eventsService.update(jwtUser, existing, request));
+    }
+    @GetMapping("/{event}/details")
+    public ApiResponse<AdminEventResponse> getDetails(
+            @CurrentUser CurrentJwtUser jwtUser,
+            @PathVariable("event") EventDto existing
+            ) {
+
+        return ApiResponse.ok(eventsService.getDetails(existing));
+    }
+
+    @Override
+    @PostMapping()
+    public ApiResponse<AdminEventResponse> create(
+            @CurrentUser CurrentJwtUser jwtUser,
+            @RequestBody EventRequest request) {
+
+        return ApiResponse.ok(eventsService.create(jwtUser, request));
+    }
 }

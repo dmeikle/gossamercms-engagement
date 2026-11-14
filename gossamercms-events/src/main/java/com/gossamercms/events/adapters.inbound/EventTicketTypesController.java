@@ -17,10 +17,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-ticket-types")
 public class EventTicketTypesController extends TypedBaseController<
-        EventTicketType, EventTicketTypeDto, EventTicketTypeRequest, EventTicketTypeResponse> {
+        EventTicketType, EventTicketTypeDto, EventTicketTypeRequest, EventTicketTypeResponse, EventTicketTypeResponse> {
 
     public EventTicketTypesController(EventTicketTypesHandler handler) {
-        super(handler);
+        super(handler, EventTicketTypeResponse.class);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class EventTicketTypesController extends TypedBaseController<
                 .sessionId(request.getSessionId())
                 .name(request.getName())
                 .description(request.getDescription())
-                .ticketType(request.getTicketType())
+                .ticketTypeId(request.getTicketTypeId())
                 .price(request.getPrice())
                 .currency(request.getCurrency())
                 .quantityAvailable(request.getQuantityAvailable())
@@ -54,7 +54,7 @@ public class EventTicketTypesController extends TypedBaseController<
                 .sessionId(dto.getSessionId())
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .ticketType(dto.getTicketType())
+                .ticketTypeId(dto.getTicketTypeId())
                 .price(dto.getPrice())
                 .currency(dto.getCurrency())
                 .quantityAvailable(dto.getQuantityAvailable())

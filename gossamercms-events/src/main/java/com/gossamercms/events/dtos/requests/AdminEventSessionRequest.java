@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminEventSessionRequest {
-    private UUID eventId;
+
     private UUID locationId;
     private String title;
     private String description;
@@ -22,4 +22,5 @@ public class AdminEventSessionRequest {
     private String timezone;
     private Integer sortOrder;
     private String status;
+    private EventLocationRequest location;
 }

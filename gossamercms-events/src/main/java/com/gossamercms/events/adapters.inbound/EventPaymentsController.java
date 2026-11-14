@@ -19,10 +19,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-payments")
 public class EventPaymentsController extends TypedBaseController<
-        EventPayment, EventPaymentDto, EventPaymentRequest, EventPaymentResponse> {
+        EventPayment, EventPaymentDto, EventPaymentRequest, EventPaymentResponse, EventPaymentResponse> {
 
     public EventPaymentsController(EventPaymentsHandler handler) {
-        super(handler);
+        super(handler, EventPaymentResponse.class);
     }
 
     @Override

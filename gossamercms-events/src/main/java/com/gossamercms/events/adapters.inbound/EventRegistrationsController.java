@@ -17,10 +17,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-registrations")
 public class EventRegistrationsController extends TypedBaseController<
-        EventRegistration, EventRegistrationDto, EventRegistrationRequest, EventRegistrationResponse> {
+        EventRegistration, EventRegistrationDto, EventRegistrationRequest, EventRegistrationResponse, EventRegistrationResponse> {
 
     public EventRegistrationsController(EventRegistrationsHandler handler) {
-        super(handler);
+        super(handler, EventRegistrationResponse.class);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class EventRegistrationsController extends TypedBaseController<
                 .eventId(request.getEventId())
                 .orderId(request.getOrderId())
                 .orderItemId(request.getOrderItemId())
-                .userId(request.getUserId())
+                .userContextId(request.getUserContextId())
                 .attendeeFirstName(request.getAttendeeFirstName())
                 .attendeeLastName(request.getAttendeeLastName())
                 .attendeeEmail(request.getAttendeeEmail())
@@ -46,7 +46,7 @@ public class EventRegistrationsController extends TypedBaseController<
                 .eventId(dto.getEventId())
                 .orderId(dto.getOrderId())
                 .orderItemId(dto.getOrderItemId())
-                .userId(dto.getUserId())
+                .userContextId(dto.getUserContextId())
                 .attendeeFirstName(dto.getAttendeeFirstName())
                 .attendeeLastName(dto.getAttendeeLastName())
                 .attendeeEmail(dto.getAttendeeEmail())

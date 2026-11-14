@@ -1,7 +1,7 @@
 CREATE TABLE event_organizer_members (
     "id" UUID PRIMARY KEY,
     "organizerId" UUID,
-    "userId" UUID,
+    "userContextId" UUID,
     "role" VARCHAR,
     "status" VARCHAR,
     "invitedAt" TIMESTAMP,
@@ -10,7 +10,7 @@ CREATE TABLE event_organizer_members (
     "createdAt" TIMESTAMP DEFAULT NOW(),
     "updatedAt" TIMESTAMP DEFAULT NOW(),
     CONSTRAINT "fk_event_organizer_members_organizerId" FOREIGN KEY ("organizerId") REFERENCES "event_organizers" ("id"),
-    CONSTRAINT "fk_event_organizer_members_userId" FOREIGN KEY ("userId") REFERENCES "users" ("id")
+    CONSTRAINT "fk_event_organizer_members_userContextId" FOREIGN KEY ("userContextId") REFERENCES "user_contexts" ("id")
 );
 CREATE INDEX "idx_event_organizer_members_organizerId" ON "event_organizer_members" ("organizerId");
-CREATE INDEX "idx_event_organizer_members_userId" ON "event_organizer_members" ("userId");
+CREATE INDEX "idx_event_organizer_members_userContextId" ON "event_organizer_members" ("userContextId");

@@ -9,7 +9,7 @@ CREATE TABLE event_check_ins (
     "updatedAt" TIMESTAMP DEFAULT NOW(),
     CONSTRAINT "fk_event_check_ins_ticketId" FOREIGN KEY ("ticketId") REFERENCES "event_tickets" ("id"),
     CONSTRAINT "fk_event_check_ins_sessionId" FOREIGN KEY ("sessionId") REFERENCES "event_sessions" ("id"),
-    CONSTRAINT "fk_event_check_ins_checkedInBy" FOREIGN KEY ("checkedInBy") REFERENCES "users" ("id")
+    CONSTRAINT "fk_event_check_ins_checkedInBy" FOREIGN KEY ("checkedInBy") REFERENCES "user_contexts" ("id")
 );
 CREATE INDEX "idx_event_check_ins_ticketId" ON "event_check_ins" ("ticketId");
 CREATE INDEX "idx_event_check_ins_sessionId" ON "event_check_ins" ("sessionId");

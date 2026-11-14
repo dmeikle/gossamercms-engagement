@@ -21,7 +21,8 @@ public class AdminNewsletterSubscribersController extends BaseController<Newslet
 
     @Override
     protected NewsletterSubscriberDto toDto(NewsletterSubscriberRequest request) {
-        return NewsletterSubscriberDto.builder()
+        return NewsletterSubscriberDto
+                .builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

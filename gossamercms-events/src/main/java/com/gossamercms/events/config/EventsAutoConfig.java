@@ -3,8 +3,10 @@ package com.gossamercms.events.config;
 import com.gossamercms.mvc.autoconfig.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @AutoConfiguration
+@EnableConfigurationProperties(EventCheckoutProperties.class)
 @EnableModuleModels(basePackage = "com.gossamercms.events.models")
 @EnableModuleConverters(basePackage = "com.gossamercms.events.converters")
 @EnableModuleDbServices(basePackage = "com.gossamercms.events.data")

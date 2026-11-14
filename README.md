@@ -63,16 +63,38 @@ Order mutations are service workflows, not generic CRUD. No payment SDK is inclu
 | POST | `/event-orders/{orderId}/refund` | Purchaser or event manager |
 
 Checkout body:
+
+Ticket prices of zero represent free admission, independently of ticket sales
+status. An order with a zero total is immediately `confirmed`, consumes inventory,
+and returns a null `checkoutUrl`; no payment adapter or payment record is required.
+Success/cancel URLs are not needed for free orders. Mixed free/paid orders use normal
+payment checkout and require both URLs in the host application's configuration. Availability dates and quantity limits
+apply to free tickets too. Clients must display the confirmed order rather than
+redirect when `checkoutUrl` is null. Confirmation does not itself issue QR tickets.
+
 ```json
 {
   "name": "Buyer",
   "email": "buyer@example.com",
   "currency": "USD",
-  "items": [{"ticketTypeId": "00000000-0000-0000-0000-000000000001", "quantity": 2}],
-  "successUrl": "https://example.com/success",
-  "cancelUrl": "https://example.com/cancel"
+  "items": [{"eventTicketTypeId": "00000000-0000-0000-0000-000000000001", "quantity": 2}]
 }
 ```
+
+Configure payment redirects in the parent website's `application.yaml`, not in
+the checkout request:
+
+```yaml
+gossamercms:
+  events:
+    checkout:
+      success-url: https://example.com/events/checkout/success
+      cancel-url: https://example.com/events/checkout/cancel
+```
+
+Paid checkout requires absolute HTTP(S) URLs without embedded credentials.
+Missing or invalid configuration is reported as a server error, not a buyer input
+error. The module registers these properties through `EventsAutoConfig`.
 
 Cancel requires `{"reason":"Changed plans"}`. Refund requires
 `{"amount":10.00,"reason":"Partial refund"}` in currency major units.
@@ -96,8 +118,9 @@ registrations/tickets.
 
 ### Payment integration and recovery
 
-Register an `EventPaymentAdapter` Spring bean (a Stripe adapter can implement this
-later). Missing/ambiguous checkout adapters or a missing adapter for an existing
+Register an `EventPaymentAdapter` Spring bean. The `gossamercms-stripe` module
+provides a real Stripe Checkout/refund adapter as well as a separate development
+mock. Missing/ambiguous checkout adapters or a missing adapter for an existing
 payment's provider return **503**, never simulated checkout/refund success.
 Use one adapter or mark the default checkout adapter `@Primary`; persisted payments
 route back to their provider name. Provider names must be stable and unique.
@@ -124,15 +147,96 @@ the same amount and reason to reuse the persisted refund operation ID. Different
 refunds are blocked until that operation is reconciled. Successful cumulative
 refunds cannot exceed the confirmed payment or order total.
 
-The future adapter integration must add verified, idempotent webhooks/reconciliation
-to record confirmed `providerPaymentId`, payment/order `paid` states, and move
-reserved inventory to sold. It must lock the order, then payment, then ticket types
-in ascending UUID string order, and respect `cancelling`/`refund_processing` claims. Expiry and
+`EventPaymentCompletionService` records verified payment/cancellation outcomes.
+It validates provider session, amount, and currency, locks order/payment/ticket
+rows in a stable order, and completes inventory exactly once. Payment completion
+records `providerPaymentId`, payment/order `paid` states and timestamps, and moves
+reserved inventory to sold. The real Stripe adapter does not mark orders paid from a browser redirect.
+Production still needs a signature-verified webhook/reconciliation handler before
+calling this internal service. Conflicting cancellation/refund states are rejected. Expiry and
 abandoned checkout cleanup likewise require provider confirmation before releasing
 inventory; no automatic expiry worker is included. Crash recovery must reuse the
 persisted order/refund UUID, not issue a new provider operation. Until that integration
-exists, checkout is explicitly unavailable without a configured adapter and refunds
+exists, successful Stripe payments will not complete orders automatically; refunds
 require an independently confirmed persisted payment.
+
+### Real Stripe configuration
+
+Set the Stripe secret key through an environment variable or another secret store,
+and configure browser-facing result routes in the parent website. These URLs are
+sent to Stripe when the events module creates its server-side Checkout Session:
+
+```yaml
+gossamercms:
+  stripe:
+    api:
+      secret-key: ${STRIPE_SECRET_KEY}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET}
+  events:
+    checkout:
+      success-url: "https://example.com/events/checkout/success?session_id={CHECKOUT_SESSION_ID}"
+      cancel-url: "https://example.com/events/checkout/cancel"
+```
+
+The success route can display order status, but must not treat the redirect as proof
+of payment. This module's `POST /stripe/webhook` endpoint verifies Stripe's signature
+and completes paid Checkout Sessions through `EventPaymentCompletionService`. Point a Stripe webhook endpoint to
+`POST /stripe/webhook` (including the host's servlet context path, if any), subscribe
+to `checkout.session.completed` and `checkout.session.async_payment_succeeded`, and
+set the endpoint's signing secret as `STRIPE_WEBHOOK_SECRET`. Configure its Stripe API
+version to match the Stripe Java SDK version used by this module so Checkout Session
+objects can be safely deserialized. Permit this route through host authentication
+and CSRF filters; the verified Stripe signature is its authentication. The events
+order service creates Checkout Sessions directly through the adapter, so the
+standalone `/stripe/create-checkout-session` endpoint is not part of this purchase flow.
+
+### Browser testing with mock Stripe
+
+Use the **development-only mock** for browser-flow testing. Enable it explicitly in
+the parent website's local configuration (never production):
+
+```yaml
+gossamercms:
+  events:
+    checkout:
+      success-url: http://localhost:8080/events/checkout/success
+      cancel-url: http://localhost:8080/events/checkout/cancel
+  stripe:
+    mock:
+      enabled: true
+      base-url: http://localhost:8080/api1.0
+```
+
+`base-url` is the externally reachable backend URL **including its servlet context
+path**, if any. Alternatively, set `base-url: http://localhost:8080` and
+`context-path: /api1.0` under `gossamercms.stripe.mock`. `context-path` defaults to
+empty; specify the context in only one place. Success/cancel URLs point to your browser-facing result pages,
+which the parent website must implement. The provider and mock routes are absent
+unless `gossamercms.stripe.mock.enabled=true`. Its provider name is `stripe-mock`;
+it never reports a real Stripe charge.
+
+1. Rebuild/install the events and Stripe modules, then restart the parent website.
+2. Submit the normal authenticated `POST /events/{eventId}/orders` request.
+3. Navigate the browser to the returned `data.checkoutUrl`.
+4. Choose **Simulate successful payment** or **Cancel purchase**.
+5. After the redirect, fetch the order using its existing authenticated read route.
+   Preserve the returned order ID in browser state before navigating to checkout.
+   Successful payment yields `paid`; cancellation yields `cancelled` and releases
+   reserved inventory. Duplicate callbacks do not sell/release tickets twice.
+
+The host security rules must allow GET and POST to `/mock-stripe/checkout/**`
+in local mock mode so browser navigation works without a JWT header. Only this
+dedicated mock route should be allowed anonymously, not the order APIs.
+Each checkout URL contains an unguessable, 30-minute capability token; anyone
+holding it can simulate payment/cancellation. Do not log/share checkout URLs.
+The form includes the host's CSRF token when CSRF protection is enabled; retain
+CSRF protection rather than disabling it globally.
+
+Mock sessions live in memory, require a single application instance, and are lost
+on restart. Existing orders then require manual development cleanup/reconciliation
+before releasing their inventory; restart does not cancel them. Mock refunds are
+also simulated, not real. This flow completes payment/order/inventory only; it does
+not yet issue attendee records or QR tickets. Free orders still bypass checkout.
 
 Apply `V202611020100100__event_order_workflows.sql` after existing event migrations.
 It adds private public-token storage, cancellation reasons, and uniqueness guards.
@@ -155,6 +259,12 @@ location, and event request contracts are reused where compatible. Separate
 admin contracts preserve administrative fields such as organizer Stripe settings,
 event visibility/publication state, order totals, and payment/refund provider IDs
 without changing public workflow contracts.
+
+`POST /admin/events` creates an event with its location through `EventsService`.
+`PUT /admin/events/{event}/details` updates event and location details using
+`EventRequest`; the inherited `PUT /admin/events/{id}` DTO update remains available.
+Both service-backed routes return `AdminEventResponse`, including administrative
+visibility/publication fields and the nested location.
 
 Event publish/cancel actions and organizer event/member actions retain their
 existing payloads and behavior. Location reads use the mapped response; location

@@ -21,10 +21,10 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/event-locations")
-public class EventLocationsController extends TypedBaseController<EventLocation, EventLocationDto, EventLocationRequest, EventLocationResponse> {
+public class EventLocationsController extends TypedBaseController<EventLocation, EventLocationDto, EventLocationRequest, EventLocationResponse, EventLocationResponse> {
 
     public EventLocationsController(EventLocationsHandler handler) {
-        super(handler);
+        super(handler, EventLocationResponse.class);
     }
 
     @Override

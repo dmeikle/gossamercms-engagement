@@ -30,7 +30,7 @@ public class EventOrderItemsDbService extends BaseDbService<EventOrderItem, Even
                 SELECT * FROM event_order_items WHERE "orderId"=:id ORDER BY "ticketTypeId"
                 """, Map.of("id", orderId)).stream().map(row -> {
                     var item = EventDbRows.mapRowToDto(row, EventOrderItemDto.class);
-                    return new EventOrderResponse.Item(item.getTicketTypeId(), item.getQuantity(),
+                    return new EventOrderResponse.Item(item.getId(), item.getTicketTypeId(), item.getQuantity(),
                             item.getUnitPrice(), item.getLineTotal());
                 }).toList();
     }

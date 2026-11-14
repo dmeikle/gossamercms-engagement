@@ -28,4 +28,5 @@ public class EventResponse {
     private Instant registrationStartAt;
     private Instant registrationEndAt;
     private Boolean isFeatured;
+    private EventLocationResponse location;
 }

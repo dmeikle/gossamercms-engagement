@@ -21,7 +21,7 @@ public class EventOrder implements BaseModel{
     private UUID id;
     private UUID eventId;
     private String orderNumber;
-    private UUID purchaserUserId;
+    private UUID purchaserUserContextId;
     private String purchaserName;
     private String purchaserEmail;
     private String currency;
@@ -43,7 +43,7 @@ public class EventOrder implements BaseModel{
             .id(id)
             .eventId(eventId)
             .orderNumber(orderNumber)
-            .purchaserUserId(purchaserUserId)
+            .purchaserUserContextId(purchaserUserContextId)
             .purchaserName(purchaserName)
             .purchaserEmail(purchaserEmail)
             .currency(currency)
@@ -67,7 +67,7 @@ public static final ModelMeta META = ModelMeta.builderWithId("event_orders")
     .column("id", UUID.class)
     .column("eventId", UUID.class)
     .column("orderNumber", String.class, 50)
-    .column("purchaserUserId", UUID.class)
+    .column("purchaserUserContextId", UUID.class)
     .column("purchaserName", String.class, 255)
     .column("purchaserEmail", String.class, 255)
     .column("currency", String.class, 3)

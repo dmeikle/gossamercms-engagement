@@ -44,11 +44,11 @@ public class EventOrdersDbService extends BaseDbService<EventOrder, EventOrderDt
 
     public void createCheckout(EventOrderDto order) {
         jdbc().update("""
-                INSERT INTO event_orders ("id","eventId","orderNumber","purchaserUserId","purchaserName",
+                INSERT INTO event_orders ("id","eventId","orderNumber","purchaserUserContextId","purchaserName",
                   "purchaserEmail","currency","subtotal","discountTotal","taxTotal","serviceFee","total","status","expiresAt")
                 VALUES (:id,:event,:number,:user,:name,:email,:currency,:total,0,0,0,:total,'checkout_creating',:expires)
                 """, Map.of("id", order.getId(), "event", order.getEventId(), "number", order.getOrderNumber(),
-                "user", order.getPurchaserUserId(), "name", order.getPurchaserName(), "email", order.getPurchaserEmail(),
+                "user", order.getPurchaserUserContextId(), "name", order.getPurchaserName(), "email", order.getPurchaserEmail(),
                 "currency", order.getCurrency(), "total", order.getTotal(),
                 "expires", Timestamp.from(order.getExpiresAt())));
     }
@@ -59,10 +59,26 @@ public class EventOrdersDbService extends BaseDbService<EventOrder, EventOrderDt
                 """, Map.of("id", orderId, "hash", hash, "expires", Timestamp.from(expiresAt)));
     }
 
+    public void confirmFreeOrder(UUID id) {
+        int changed = jdbc().update("""
+                UPDATE event_orders SET "status"='confirmed',"expiresAt"=NULL,
+                  "updatedAt"=CURRENT_TIMESTAMP
+                WHERE "id"=:id AND "total"=0 AND "status"='checkout_creating'
+                """, Map.of("id", id));
+        if (changed != 1) throw new ResponseStatusException(HttpStatus.CONFLICT, "Free order could not be confirmed");
+    }
+
     public void markCheckoutUnknown(UUID id) {
         jdbc().update("""
                 UPDATE event_orders SET "status"='checkout_unknown',"updatedAt"=CURRENT_TIMESTAMP
                 WHERE "id"=:id AND "status"='checkout_creating'
+                """, Map.of("id", id));
+    }
+
+    public void completePayment(UUID id) {
+        jdbc().update("""
+                UPDATE event_orders SET "status"='paid',"paidAt"=CURRENT_TIMESTAMP,
+                  "expiresAt"=NULL,"updatedAt"=CURRENT_TIMESTAMP WHERE "id"=:id
                 """, Map.of("id", id));
     }
 

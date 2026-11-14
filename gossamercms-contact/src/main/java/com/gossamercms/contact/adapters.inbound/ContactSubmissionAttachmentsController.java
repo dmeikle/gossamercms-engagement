@@ -20,10 +20,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/contact-submission-attachments")
-public class ContactSubmissionAttachmentsController extends TypedBaseController<ContactSubmissionAttachment, ContactSubmissionAttachmentDto, ContactSubmissionAttachmentRequest, ContactSubmissionAttachmentResponse> {
+public class ContactSubmissionAttachmentsController extends TypedBaseController<ContactSubmissionAttachment, ContactSubmissionAttachmentDto, ContactSubmissionAttachmentRequest, ContactSubmissionAttachmentResponse, ContactSubmissionAttachmentResponse> {
 
     public ContactSubmissionAttachmentsController(ContactSubmissionAttachmentsHandler handler) {
-        super(handler);
+        super(handler, ContactSubmissionAttachmentResponse.class);
     }
 
     @Override

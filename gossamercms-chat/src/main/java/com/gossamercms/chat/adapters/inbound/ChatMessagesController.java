@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/chat-messages")
-public class ChatMessagesController extends TypedBaseController<ChatMessage, ChatMessageDto, ChatMessageRequest,  ChatMessageResponse> {
+public class ChatMessagesController extends TypedBaseController<ChatMessage, ChatMessageDto, ChatMessageRequest,  ChatMessageResponse, ChatMessageResponse> {
 
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -39,7 +39,7 @@ public class ChatMessagesController extends TypedBaseController<ChatMessage, Cha
                                   ChatService chatService,
                                   SimpMessagingTemplate messagingTemplate,
                                   ChatConversationsDbService chatConversationsDbService) {
-        super(handler);
+        super(handler, ChatMessageResponse.class);
         this.chatService = chatService;
         this.messagingTemplate = messagingTemplate;
         this.chatConversationsDbService = chatConversationsDbService;

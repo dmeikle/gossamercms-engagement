@@ -13,6 +13,7 @@
         <module>gossamercms-events</module>
         <module>gossamercms-contact</module>
         <module>gossamercms-chat</module>
+        <module>gossamercms-stripe</module>
     </modules>
 
     <properties>

@@ -57,6 +57,13 @@ public class EventPaymentsDbService extends BaseDbService<EventPayment, EventPay
                 """, Map.of("id", orderId));
     }
 
+    public void completePayment(UUID id, String providerPaymentId) {
+        jdbc().update("""
+                UPDATE event_payments SET "status"='paid',"providerPaymentId"=:payment,
+                  "processedAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP WHERE "id"=:id
+                """, Map.of("id", id, "payment", providerPaymentId));
+    }
+
     public void setStatus(UUID id, String status) {
         jdbc().update("""
                 UPDATE event_payments SET "status"=:status,"updatedAt"=CURRENT_TIMESTAMP WHERE "id"=:id

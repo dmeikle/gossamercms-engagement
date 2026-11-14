@@ -17,10 +17,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/event-promo-codes")
 public class EventPromoCodesController extends TypedBaseController<
-        EventPromoCode, EventPromoCodeDto, EventPromoCodeRequest, EventPromoCodeResponse> {
+        EventPromoCode, EventPromoCodeDto, EventPromoCodeRequest, EventPromoCodeResponse, EventPromoCodeResponse> {
 
     public EventPromoCodesController(EventPromoCodesHandler handler) {
-        super(handler);
+        super(handler, EventPromoCodeResponse.class);
     }
 
     @Override
