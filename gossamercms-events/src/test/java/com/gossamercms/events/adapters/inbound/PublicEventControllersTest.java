@@ -1,10 +1,13 @@
 package com.gossamercms.events.adapters.inbound;
 
+import com.gossamercms.events.dtos.responses.EventTicketListResponse;
+import com.gossamercms.events.handlers.EventTicketsHandler;
 import com.gossamercms.mvc.controllers.TypedBaseController;
 import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.handlers.BaseHandler;
 import com.gossamercms.mvc.jwt.CurrentJwtUser;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +36,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 class PublicEventControllersTest {
+    @Test
+    void ticketListRequiresUserContext() throws Exception {
+        var handler = mock(EventTicketsHandler.class);
+        var user = mock(CurrentJwtUser.class);
+        var mvc = standaloneSetup(new EventTicketsController(handler))
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType() == CurrentJwtUser.class;
+                    }
+
+                    @Override
+                    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer container,
+                                                  NativeWebRequest request, WebDataBinderFactory factory) {
+                        return user;
+                    }
+                }).build();
+
+        mvc.perform(get("/event-tickets").param("userContextId", UUID.randomUUID().toString()))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(handler);
+    }
+
     static Stream<Class<?>> controllers() {
         return Stream.of(EventPaymentsController.class, EventPromoCodesController.class,
                 EventRegistrationsController.class, EventTicketsController.class,
@@ -57,11 +83,17 @@ class PublicEventControllersTest {
         var constructor = type.getConstructors()[0];
         Object dependency = mock(constructor.getParameterTypes()[0]);
         var handler = (BaseHandler<?, ?>) dependency;
-        Object listResponseBuilder = responseListType.getMethod("builder").invoke(null);
-        listResponseBuilder.getClass().getMethod("id", UUID.class).invoke(listResponseBuilder, id);
-        Object listResponse = listResponseBuilder.getClass().getMethod("build").invoke(listResponseBuilder);
-        doReturn(ListResultset.of(List.of(listResponse), 2, 10, 1))
-                .when(handler).getAll(any(QueryOptions.class), eq(responseListType));
+        if (type == EventTicketsController.class) {
+            var listResponse = EventTicketListResponse.builder().ticketId(id).qrTokenHash("list-hash").build();
+            doReturn(ListResultset.of(List.of(listResponse), 2, 10, 1))
+                    .when((EventTicketsHandler) dependency).listByUserContext(any(QueryOptions.class));
+        } else {
+            Object listResponseBuilder = responseListType.getMethod("builder").invoke(null);
+            listResponseBuilder.getClass().getMethod("id", UUID.class).invoke(listResponseBuilder, id);
+            Object listResponse = listResponseBuilder.getClass().getMethod("build").invoke(listResponseBuilder);
+            doReturn(ListResultset.of(List.of(listResponse), 2, 10, 1))
+                    .when(handler).getAll(any(QueryOptions.class), eq(responseListType));
+        }
         Object controller = constructor.newInstance(dependency);
 
         var conversion = new DefaultFormattingConversionService();
@@ -77,6 +109,8 @@ class PublicEventControllersTest {
             }
         });
         var user = mock(CurrentJwtUser.class);
+        UUID userContextId = UUID.randomUUID();
+        when(user.getUserContextId()).thenReturn(userContextId);
         var mvc = standaloneSetup(controller).setConversionService(conversion)
                 .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
                     @Override
@@ -92,16 +126,28 @@ class PublicEventControllersTest {
                 }).build();
         String path = type.getAnnotation(RequestMapping.class).value()[0];
 
-        mvc.perform(get(path).param("page", "2").param("size", "10").param("status", "active"))
+        var listRequest = get(path).param("page", "2").param("size", "10").param("status", "active");
+        if (type == EventTicketsController.class) {
+            listRequest.param("userContextId", UUID.randomUUID().toString());
+        }
+        var listResult = mvc.perform(listRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.list[0].id").value(id.toString()))
-                .andExpect(jsonPath("$.data.list[0].createdAt").doesNotExist())
-                .andExpect(jsonPath("$.data.list[0].qrTokenHash").doesNotExist());
+                .andExpect(jsonPath("$.data.list[0].createdAt").doesNotExist());
         var options = ArgumentCaptor.forClass(QueryOptions.class);
-        verify(handler).getAll(options.capture(), eq(responseListType));
+        if (type == EventTicketsController.class) {
+            listResult.andExpect(jsonPath("$.data.list[0].ticketId").value(id.toString()))
+                    .andExpect(jsonPath("$.data.list[0].id").doesNotExist())
+                    .andExpect(jsonPath("$.data.list[0].qrTokenHash").value("list-hash"));
+            verify((EventTicketsHandler) dependency).listByUserContext(options.capture());
+            assertEquals(Map.of("status", "active", "userContextId", userContextId), options.getValue().filters());
+        } else {
+            listResult.andExpect(jsonPath("$.data.list[0].id").value(id.toString()))
+                    .andExpect(jsonPath("$.data.list[0].qrTokenHash").doesNotExist());
+            verify(handler).getAll(options.capture(), eq(responseListType));
+            assertEquals(Map.of("status", "active"), options.getValue().filters());
+        }
         assertEquals(2, options.getValue().page());
         assertEquals(10, options.getValue().size());
-        assertEquals(Map.of("status", "active"), options.getValue().filters());
 
         mvc.perform(get(path + "/" + id))
                 .andExpect(status().isOk())

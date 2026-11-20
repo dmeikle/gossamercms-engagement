@@ -2,25 +2,29 @@ package com.gossamercms.events.adapters.inbound;
 
 import com.gossamercms.events.dtos.EventTicketDto;
 import com.gossamercms.events.dtos.requests.EventTicketRequest;
+import com.gossamercms.events.dtos.responses.EventTicketListResponse;
 import com.gossamercms.events.dtos.responses.EventTicketResponse;
 import com.gossamercms.events.handlers.EventTicketsHandler;
 import com.gossamercms.events.models.EventTicket;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.controllers.TypedBaseController;
 import com.gossamercms.mvc.data.ListResultset;
+import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.http.ApiResponse;
 import com.gossamercms.mvc.jwt.CurrentJwtUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/event-tickets")
 public class EventTicketsController extends TypedBaseController<
-        EventTicket, EventTicketDto, EventTicketRequest, EventTicketResponse, EventTicketResponse> {
+        EventTicket, EventTicketDto, EventTicketRequest, EventTicketResponse, EventTicketListResponse> {
 
     public EventTicketsController(EventTicketsHandler handler) {
-        super(handler, EventTicketResponse.class);
+        super(handler, EventTicketListResponse.class);
     }
 
     @Override
@@ -53,13 +57,26 @@ public class EventTicketsController extends TypedBaseController<
 
 
     @GetMapping
-    public ApiResponse<ListResultset<EventTicketResponse>> getAll(
+    public ApiResponse<ListResultset<EventTicketListResponse>> getAll(
             @CurrentUser CurrentJwtUser jwtUser,
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "50") int size,
             @RequestParam Map<String, Object> params) {
 
-        return ApiResponse.ok(_getAll(jwtUser, page, size, params));
+        if (jwtUser == null || jwtUser.getUserContextId() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "A user context is required");
+        }
+        params.remove("page");
+        params.remove("size");
+        params.put("userContextId", jwtUser.getUserContextId());
+
+        return ApiResponse.ok(((EventTicketsHandler) handler)
+                .listByUserContext(
+                        QueryOptions.builder()
+                                .page(page)
+                                .size(size)
+                                .filters(params)
+                                .build()));
     }
 
     @Override
