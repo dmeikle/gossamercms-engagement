@@ -1,4 +1,4 @@
-CREATE TABLE contact_submission_attachments (
+CREATE TABLE  if not exists contact_submission_attachments (
     "id" UUID PRIMARY KEY,
     "contactSubmissionId" UUID,
     "fileName" VARCHAR(255),
@@ -12,5 +12,5 @@ CREATE TABLE contact_submission_attachments (
     "updatedAt" TIMESTAMP DEFAULT NOW(),
     CONSTRAINT "fk_contact_submission_attachments_contactSubmissionId" FOREIGN KEY ("contactSubmissionId") REFERENCES "contact_submissions" ("id")
 );
-CREATE INDEX "idx_contact_submission_attachments_contactSubmissionId" ON "contact_submission_attachments" ("contactSubmissionId");
+CREATE INDEX if not exists "idx_contact_submission_attachments_contactSubmissionId" ON "contact_submission_attachments" ("contactSubmissionId");
 

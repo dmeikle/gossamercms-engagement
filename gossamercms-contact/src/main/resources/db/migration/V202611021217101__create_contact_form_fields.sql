@@ -1,4 +1,4 @@
-CREATE TABLE contact_form_fields (
+CREATE TABLE if not exists  contact_form_fields (
     "id" UUID PRIMARY KEY,
     "contactFormId" UUID,
     "name" VARCHAR(100),
@@ -18,5 +18,5 @@ CREATE TABLE contact_form_fields (
     "updatedAt" TIMESTAMP DEFAULT NOW(),
     CONSTRAINT "fk_contact_form_fields_contactFormId" FOREIGN KEY ("contactFormId") REFERENCES "contact_forms" ("id")
 );
-CREATE INDEX "idx_contact_form_fields_contactFormId" ON "contact_form_fields" ("contactFormId");
-CREATE UNIQUE INDEX "idx_contact_form_fields_contactFormId_name" ON "contact_form_fields" ("contactFormId", "name");
+CREATE INDEX if not exists "idx_contact_form_fields_contactFormId" ON "contact_form_fields" ("contactFormId");
+CREATE UNIQUE INDEX if not exists "idx_contact_form_fields_contactFormId_name" ON "contact_form_fields" ("contactFormId", "name");

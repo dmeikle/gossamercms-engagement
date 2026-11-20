@@ -1,4 +1,4 @@
-CREATE TABLE contact_forms (
+CREATE TABLE if not exists contact_forms (
     "id" UUID PRIMARY KEY,
     "name" VARCHAR(255),
     "slug" VARCHAR(255),
@@ -19,4 +19,4 @@ CREATE TABLE contact_forms (
     "updatedAt" TIMESTAMP DEFAULT NOW()
 
 );
-CREATE INDEX "idx_contact_forms_slug" ON "contact_forms" ("slug");
+CREATE INDEX  if not exists "idx_contact_forms_slug" ON "contact_forms" ("slug");
