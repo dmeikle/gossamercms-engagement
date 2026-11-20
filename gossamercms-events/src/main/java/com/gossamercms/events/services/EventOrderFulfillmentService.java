@@ -64,12 +64,12 @@ public class EventOrderFulfillmentService {
             EventOrderDto order,
             EventOrderResponse.Item item,
             EventRegistrationDto registration) {
-
+        long ticketNumber = eventTicketsDbService.getNextPurchaseSequenceValue();
         return eventTicketsDbService.create(order.getPurchaserUserContextId(),
                 EventTicketDto.builder()
                         .issuedAt(order.getCreatedAt())
                         .status(EventTicketStatuses.ISSUED.toString())
-                        .ticketNumber(order.getId() + "-" + item.id())
+                        .ticketNumber("EVT" + ticketNumber)
                         .ticketTypeId(item.ticketTypeId())
                         .registrationId(registration.getId())
                         .build());

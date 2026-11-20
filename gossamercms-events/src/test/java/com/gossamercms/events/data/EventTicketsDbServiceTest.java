@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Map;
@@ -24,7 +25,7 @@ class EventTicketsDbServiceTest {
     @Test
     void listsAndCountsOnlyTheUsersRegisteredTickets() {
         var source = new DriverManagerDataSource(
-                "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "sa", "");
+                "jdbc:h2:mem:" + UUID.randomUUID() + ";MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1", "sa", "");
         var jdbc = new JdbcTemplate(source);
         jdbc.execute("""
                 CREATE TABLE events ("id" UUID PRIMARY KEY, title VARCHAR, slug VARCHAR, summary VARCHAR,
@@ -32,8 +33,14 @@ class EventTicketsDbServiceTest {
                 "thumbnailImageUrl" VARCHAR, "isFeatured" BOOLEAN)
                 """);
         jdbc.execute("""
-                CREATE TABLE event_registrations ("id" UUID PRIMARY KEY, "eventId" UUID, "userContextId" UUID,
+                CREATE TABLE event_registrations ("id" UUID PRIMARY KEY, "eventId" UUID, "orderId" UUID, "userContextId" UUID,
                 "status" VARCHAR, "registeredAt" TIMESTAMP, "cancelledAt" TIMESTAMP)
+                """);
+        jdbc.execute("""
+                CREATE TABLE event_orders ("id" UUID PRIMARY KEY, total DECIMAL(19, 2))
+                """);
+        jdbc.execute("""
+                CREATE TABLE event_order_items ("id" UUID PRIMARY KEY, "orderId" UUID)
                 """);
         jdbc.execute("""
                 CREATE TABLE event_tickets ("id" UUID PRIMARY KEY, "registrationId" UUID, "ticketTypeId" UUID,
@@ -48,9 +55,9 @@ class EventTicketsDbServiceTest {
                 INSERT INTO events ("id", title, "startAt", "isFeatured")
                 VALUES (?, 'Example', ?, TRUE)
                 """, eventId, Timestamp.from(Instant.parse("2026-01-02T03:04:05Z")));
-        insertTicket(jdbc, eventId, firstUser, firstTicket, "REGISTERED");
-        insertTicket(jdbc, eventId, firstUser, UUID.randomUUID(), "CANCELLED");
-        insertTicket(jdbc, eventId, secondUser, secondTicket, "REGISTERED");
+        insertTicket(jdbc, eventId, firstUser, firstTicket, "REGISTERED", new BigDecimal("25.50"));
+        insertTicket(jdbc, eventId, firstUser, UUID.randomUUID(), "CANCELLED", new BigDecimal("12.00"));
+        insertTicket(jdbc, eventId, secondUser, secondTicket, "REGISTERED", new BigDecimal("40.00"));
 
         var namedJdbc = new NamedParameterJdbcTemplate(source);
         var adapter = mock(DataSourceAdapter.class);
@@ -81,10 +88,12 @@ class EventTicketsDbServiceTest {
         assertEquals(1, first.totalCount());
         assertEquals(1, first.list().size());
         assertEquals(firstTicket, first.list().getFirst().getTicketId());
+        assertEquals(new BigDecimal("25.50"), first.list().getFirst().getTotal());
         assertEquals(Instant.parse("2026-01-02T03:04:05Z"), first.list().getFirst().getStartAt());
         assertNull(first.list().getFirst().getCancelledAt());
         assertEquals(1, second.totalCount());
         assertEquals(secondTicket, second.list().getFirst().getTicketId());
+        assertEquals(new BigDecimal("40.00"), second.list().getFirst().getTotal());
         assertThrows(IllegalArgumentException.class,
                 () -> service.listByUserContext(QueryOptions.builder().build()));
     }
@@ -93,12 +102,16 @@ class EventTicketsDbServiceTest {
         return QueryOptions.builder().filters(Map.of("userContextId", userContextId)).build();
     }
 
-    private static void insertTicket(JdbcTemplate jdbc, UUID eventId, UUID userId, UUID ticketId, String status) {
+    private static void insertTicket(JdbcTemplate jdbc, UUID eventId, UUID userId, UUID ticketId, String status,
+                                     BigDecimal total) {
         UUID registrationId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        jdbc.update("INSERT INTO event_orders (\"id\", total) VALUES (?, ?)", orderId, total);
+        jdbc.update("INSERT INTO event_order_items (\"id\", \"orderId\") VALUES (?, ?)", UUID.randomUUID(), orderId);
         jdbc.update("""
-                INSERT INTO event_registrations ("id", "eventId", "userContextId", "status")
-                VALUES (?, ?, ?, ?)
-                """, registrationId, eventId, userId, status);
+                INSERT INTO event_registrations ("id", "eventId", "orderId", "userContextId", "status")
+                VALUES (?, ?, ?, ?, ?)
+                """, registrationId, eventId, orderId, userId, status);
         jdbc.update("""
                 INSERT INTO event_tickets ("id", "registrationId", status) VALUES (?, ?, 'issued')
                 """, ticketId, registrationId);

@@ -34,23 +34,39 @@ public class EventTicketsDbService extends BaseDbService<EventTicket, EventTicke
         return dto;
     }
 
+    public long getNextPurchaseSequenceValue() {
+        DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
+        String sql = """
+        SELECT nextval('ecommerce_ticket_number_seq')
+        """;
+
+        return ds.executeSql(sql, Long.class);
+    }
+
     public ListResultset<EventTicketListResponse> listByUserContext(QueryOptions options) {
         if (!(options.filters().get("userContextId") instanceof UUID)) {
             throw new IllegalArgumentException("A user context ID is required to list tickets");
         }
 
         String sql = """
-                select er."id" as "registrationId", er."registeredAt", er."cancelledAt", e."id" as "eventId", e.title, e.slug, e.summary, e."eventType", e."startAt", e."endAt", e.timezone, e."thumbnailImageUrl", e."isFeatured",
-                        et."id" as "ticketId", et."ticketTypeId", et."ticketNumber", et."qrTokenHash", et.status, et."issuedAt" from event_registrations er
-                 inner join events e on e."id" = er."eventId"
-                          inner join event_tickets et on et."registrationId" = er."id"
+                select er.id as registrationId, "registeredAt", er."cancelledAt",\s
+                       e.id as "eventId", e.title, e.slug, e.summary, e."eventType","startAt", "endAt", timezone,"thumbnailImageUrl","isFeatured",
+                       et.id as ticketId, et."ticketTypeId", "ticketNumber", "qrTokenHash", et.status, "issuedAt",
+                       eo.total
+                from event_order_items eoi
+                    inner join event_orders eo on eo.id = eoi."orderId"
+                inner join event_registrations er on er."orderId" = eo."id"
+                inner join event_tickets et on et."registrationId" = er."id"
+                inner join events e on e.id = er."eventId"
                  where er."userContextId" = :userContextId and er."status" = 'REGISTERED'
                 """;
 
         String countSql = """
-                select count(*) from event_registrations er
-                inner join events e on e."id" = er."eventId"
+                select count(*) from event_order_items eoi
+                    inner join event_orders eo on eo.id = eoi."orderId"
+                inner join event_registrations er on er."orderId" = eo."id"
                 inner join event_tickets et on et."registrationId" = er."id"
+                inner join events e on e.id = er."eventId"
                 where er."userContextId" = :userContextId and er."status" = 'REGISTERED'
                 """;
 
@@ -84,6 +100,7 @@ public class EventTicketsDbService extends BaseDbService<EventTicket, EventTicke
                         .qrTokenHash(rs.getString("qrTokenHash"))
                         .status(rs.getString("status"))
                         .issuedAt(toInstant(rs.getTimestamp("issuedAt")))
+                        .total(rs.getBigDecimal("total"))
                         .build()
         );
     }

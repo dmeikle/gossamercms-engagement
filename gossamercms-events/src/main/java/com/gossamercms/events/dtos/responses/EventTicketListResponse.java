@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -33,4 +34,5 @@ public class EventTicketListResponse {
     private String qrTokenHash;
     private String status;
     private Instant issuedAt;
+    private BigDecimal total;
 }
