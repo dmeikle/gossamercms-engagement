@@ -1,9 +1,6 @@
 package com.gossamercms.events.services;
 
-import com.gossamercms.events.data.EventLocationsDbService;
-import com.gossamercms.events.data.EventTicketTypesDbService;
-import com.gossamercms.events.data.EventTicketsDbService;
-import com.gossamercms.events.data.EventsDbService;
+import com.gossamercms.events.data.*;
 import com.gossamercms.events.dtos.EventDto;
 import com.gossamercms.events.dtos.EventLocationDto;
 import com.gossamercms.events.dtos.EventTicketTypeDto;
@@ -24,7 +21,7 @@ public class EventsService {
     private final EventsDbService eventsDbService;
     private final EventLocationsDbService eventLocationsDbService;
     private final EventTicketTypesDbService eventTicketTypesDbService;
-    private final EventTicketsDbService eventTicketsDbService;
+    private final EventSessionsDbService eventSessionsDbService;
 
     public AdminEventResponse create(CurrentJwtUser jwtUser, EventRequest request) {
         EventDto event = eventsDbService.create(jwtUser.getUserContextId(), EventDto.builder()
@@ -202,7 +199,7 @@ public class EventsService {
     }
 
     public AdminEventResponse getDetails(EventDto existing) {
-        EventLocationDto existingLocation = eventLocationsDbService.getOrNull(Map.of("eventId", existing.getId()));
+      //  EventLocationDto existingLocation = eventLocationsDbService.getOrNull(Map.of("eventId", existing.getId()));
 
         return AdminEventResponse.builder()
                 .title(existing.getTitle())
@@ -225,6 +222,11 @@ public class EventsService {
                 .location(getLocationResponse(existing))
                 .eventTicketTypes(getEventTicketTypes(existing))
                 .build();
+    }
+
+
+    public EventDetailWithSessionsResponse getDetailsWithSessions(EventDto existing) {
+        return eventSessionsDbService.getFullDetails(existing);
     }
 
 

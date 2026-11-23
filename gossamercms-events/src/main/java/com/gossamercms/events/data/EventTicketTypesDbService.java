@@ -1,14 +1,19 @@
 package com.gossamercms.events.data;
 
 import com.gossamercms.events.dtos.EventTicketTypeDto;
+import com.gossamercms.events.dtos.responses.EventSessionOptionListResponse;
+import com.gossamercms.events.dtos.responses.EventTicketTypeListResponse;
+import com.gossamercms.events.dtos.responses.EventTicketTypeResponse;
 import com.gossamercms.events.models.EventTicketType;
 import com.gossamercms.mvc.annotations.ModuleDbService;
-import com.gossamercms.mvc.data.BaseDbService;
-import com.gossamercms.mvc.data.DataSourceManager;
+import com.gossamercms.mvc.data.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,9 +81,55 @@ public class EventTicketTypesDbService extends BaseDbService<EventTicketType, Ev
         return dto;
     }
 
-    @Override
-    protected void throw404(String id) {
+
+
+    public ListResultset<EventTicketTypeListResponse> listTicketTypesByEvent(QueryOptions options) {
+        DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
+        String sql = """
+                select ett.id, ett."eventId", "sessionId", es.title as "sessionTitle", name, ett.id as "ticketTypeId", price, currency, "quantityAvailable", "quantityReserved", "quantitySold",
+                  "minimumPerOrder", "maximumPerOrder", "salesStartAt", "salesEndAt", ett."status", "isVisible"
+                  from event_ticket_types ett
+                   inner join event_sessions es on es."id" = ett."sessionId"
+                /*WHERE_CLAUSE*/
+                order by title
+                """;
+
+        String countSql = """
+               select count(ett.id)
+                  from event_ticket_types ett
+                   inner join event_sessions es on es."id" = ett."sessionId"
+                /*WHERE_CLAUSE*/
+               """;
+
+        Map<String, Object> params = Map.of("ett.eventId", options.filters().get("eventId"));
+
+        return ds.findAllBySql(sql,
+                countSql,
+                params,
+                Collections.emptyMap(),
+                options.orderBy(),
+                options.page(),
+                options.size(),
+                (rs, rownum) -> EventTicketTypeListResponse.builder()
+                        .id(rs.getObject("id", UUID.class))
+                        .currency(rs.getString("currency"))
+                        .eventId(rs.getObject("eventId", UUID.class))
+                        .sessionId(rs.getObject("sessionId", UUID.class))
+                        .sessionTitle(rs.getString("sessionTitle"))
+                        .ticketTypeId(rs.getObject("ticketTypeId", UUID.class))
+                        .name(rs.getString("name"))
+                        .price(rs.getObject("price", BigDecimal.class))
+                        .quantityAvailable(rs.getObject("quantityAvailable", Integer.class))
+                        .quantityReserved(rs.getObject("quantityReserved", Integer.class))
+                        .quantitySold(rs.getObject("quantitySold", Integer.class))
+                        .minimumPerOrder(rs.getObject("minimumPerOrder", Integer.class))
+                        .maximumPerOrder(rs.getObject("maximumPerOrder", Integer.class))
+                        .salesStartAt(toInstant(rs.getTimestamp("salesStartAt")))
+                        .salesEndAt(toInstant(rs.getTimestamp("salesEndAt")))
+                        .status(rs.getString("status"))
+                        .isVisible(rs.getObject("isVisible", Boolean.class))
+                        .build()
+        );
 
     }
-
 }

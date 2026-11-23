@@ -49,7 +49,7 @@ public class EventTicketsDbService extends BaseDbService<EventTicket, EventTicke
         }
 
         String sql = """
-                select er.id as registrationId, "registeredAt", er."cancelledAt",\s
+                select er.id as registrationId, "registeredAt", er."cancelledAt",
                        e.id as "eventId", e.title, e.slug, e.summary, e."eventType","startAt", "endAt", timezone,"thumbnailImageUrl","isFeatured",
                        et.id as ticketId, et."ticketTypeId", "ticketNumber", "qrTokenHash", et.status, "issuedAt",
                        eo.total
@@ -105,7 +105,5 @@ public class EventTicketsDbService extends BaseDbService<EventTicket, EventTicke
         );
     }
 
-    private static Instant toInstant(java.sql.Timestamp timestamp) {
-        return timestamp == null ? null : timestamp.toInstant();
-    }
+
 }

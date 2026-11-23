@@ -109,6 +109,7 @@ public class AdminEventsController extends BaseController<Event, EventDto, Event
 
         return ApiResponse.ok(eventsService.update(jwtUser, existing, request));
     }
+
     @GetMapping("/{event}/details")
     public ApiResponse<AdminEventResponse> getDetails(
             @CurrentUser CurrentJwtUser jwtUser,

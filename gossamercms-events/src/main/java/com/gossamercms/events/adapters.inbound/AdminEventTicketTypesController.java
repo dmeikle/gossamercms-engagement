@@ -5,6 +5,7 @@ import com.gossamercms.events.dtos.EventDto;
 import com.gossamercms.events.dtos.EventTicketTypeDto;
 import com.gossamercms.events.dtos.responses.AdminEventTicketTypeResponse;
 import com.gossamercms.events.dtos.requests.AdminEventTicketTypeRequest;
+import com.gossamercms.events.dtos.responses.EventTicketTypeListResponse;
 import com.gossamercms.events.dtos.responses.EventTicketTypeResponse;
 import com.gossamercms.events.handlers.EventTicketTypesHandler;
 import com.gossamercms.events.models.EventTicketType;
@@ -72,10 +73,10 @@ public class AdminEventTicketTypesController extends BaseController<EventTicketT
                 .build();
     }
 
-    @GetMapping("{event}/list-types")
-    public ApiResponse<ListResultset<EventTicketTypeResponse>> listTypes(@PathVariable(name = "event") EventDto event) {
-        ListResultset<EventTicketTypeResponse> types = this.handler.getAll(QueryOptions.builder().filters(Map.of("eventId", event.getId())).build()
-        , EventTicketTypeResponse.class);
+    @GetMapping("/{event}/list-types")
+    public ApiResponse<ListResultset<EventTicketTypeListResponse>> listTypes(@PathVariable(name = "event") EventDto event) {
+        ListResultset<EventTicketTypeListResponse> types = ((EventTicketTypesHandler) this.handler)
+                .listTicketTypesByEvent(QueryOptions.builder().filters(Map.of("eventId", event.getId())).build());
         return ApiResponse.ok(types);
     }
 }

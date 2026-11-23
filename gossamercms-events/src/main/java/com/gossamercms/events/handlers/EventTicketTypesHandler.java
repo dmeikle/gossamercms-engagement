@@ -2,8 +2,11 @@ package com.gossamercms.events.handlers;
 
 import com.gossamercms.events.data.EventTicketTypesDbService;
 import com.gossamercms.events.dtos.EventTicketTypeDto;
+import com.gossamercms.events.dtos.responses.EventTicketTypeListResponse;
 import com.gossamercms.events.models.EventTicketType;
 import com.gossamercms.mvc.annotations.ModuleHandler;
+import com.gossamercms.mvc.data.ListResultset;
+import com.gossamercms.mvc.data.QueryOptions;
 import com.gossamercms.mvc.handlers.BaseHandler;
 
 @ModuleHandler
@@ -11,5 +14,9 @@ public class EventTicketTypesHandler extends BaseHandler<EventTicketType, EventT
 
     public EventTicketTypesHandler(EventTicketTypesDbService db) {
         super(db);
+    }
+
+    public ListResultset<EventTicketTypeListResponse> listTicketTypesByEvent(QueryOptions options) {
+        return ((EventTicketTypesDbService) db).listTicketTypesByEvent(options);
     }
 }

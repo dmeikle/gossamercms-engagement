@@ -13,6 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminEventSessionListResponse {
+    private UUID id;
     private UUID eventId;
     private UUID locationId;
     private String title;

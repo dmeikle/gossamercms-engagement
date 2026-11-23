@@ -1,0 +1,34 @@
+package com.gossamercms.events.dtos.responses;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventTicketTypeListResponse {
+    private UUID id;
+    private UUID eventId;
+    private UUID sessionId;
+    private String sessionTitle;
+    private String name;
+    private UUID ticketTypeId;
+    private BigDecimal price;
+    private String currency;
+    private Integer quantityAvailable;
+    private Integer quantityReserved;
+    private Integer quantitySold;
+    private Integer minimumPerOrder;
+    private Integer maximumPerOrder;
+    private Instant salesStartAt;
+    private Instant salesEndAt;
+    private String status;
+    private Boolean isVisible;
+}

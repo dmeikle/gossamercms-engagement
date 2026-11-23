@@ -6,6 +6,7 @@ import com.gossamercms.events.dtos.EventSessionDto;
 import com.gossamercms.events.dtos.responses.AdminEventSessionListResponse;
 import com.gossamercms.events.dtos.responses.AdminEventSessionResponse;
 import com.gossamercms.events.dtos.requests.AdminEventSessionRequest;
+import com.gossamercms.events.dtos.responses.EventSessionOptionListResponse;
 import com.gossamercms.events.handlers.EventSessionsHandler;
 import com.gossamercms.events.models.EventSession;
 import com.gossamercms.mvc.annotations.CurrentUser;
@@ -96,6 +97,22 @@ public class AdminEventSessionsController extends BaseController<EventSession, E
                         .size(size)
                         .build(),
                 AdminEventSessionListResponse.class
+                )
+        );
+    }
+
+    @GetMapping("/{event}/sessions/option-list")
+    public ApiResponse<ListResultset<EventSessionOptionListResponse>> listEventSessionOptions(
+            @PathVariable("event") EventDto event,
+            @RequestParam Map<String, Object> params) {
+        params.remove("page");
+        params.remove("size");
+        params.put("eventId", event.getId());
+
+        return ApiResponse.ok(((EventSessionsHandler) handler).getOptionList(
+                QueryOptions.builder()
+                        .filters(params)
+                        .build()
                 )
         );
     }

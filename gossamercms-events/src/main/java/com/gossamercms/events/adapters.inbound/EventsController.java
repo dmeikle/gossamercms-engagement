@@ -4,11 +4,10 @@ package com.gossamercms.events.adapters.inbound;
 import com.gossamercms.events.dtos.EventDto;
 import com.gossamercms.events.dtos.requests.EventRequest;
 import com.gossamercms.events.dtos.requests.EventUpdateRequest;
-import com.gossamercms.events.dtos.responses.EventListDto;
-import com.gossamercms.events.dtos.responses.EventListResponse;
-import com.gossamercms.events.dtos.responses.EventResponse;
+import com.gossamercms.events.dtos.responses.*;
 import com.gossamercms.events.handlers.EventsHandler;
 import com.gossamercms.events.models.Event;
+import com.gossamercms.events.services.EventsService;
 import com.gossamercms.mvc.annotations.CurrentUser;
 import com.gossamercms.mvc.data.ListResultset;
 import com.gossamercms.mvc.http.ApiResponse;
@@ -25,8 +24,11 @@ import java.util.Map;
 public class EventsController extends TypedBaseController<
         Event, EventDto, EventRequest, EventResponse, EventListResponse> {
 
-    public EventsController(EventsHandler handler) {
+    private final EventsService eventsService;
+
+    public EventsController(EventsHandler handler, EventsService eventsService) {
         super(handler, EventListResponse.class);
+        this.eventsService = eventsService;
     }
 
     @Override
@@ -86,5 +88,12 @@ public class EventsController extends TypedBaseController<
     protected ApiResponse<EventResponse> getById(@PathVariable("event") EventDto existing) {
         return ApiResponse.ok(toResponse(existing));
     }
+    @GetMapping("/{event}/details")
+    public ApiResponse<EventDetailWithSessionsResponse> getDetails(
+            @CurrentUser CurrentJwtUser jwtUser,
+            @PathVariable("event") EventDto existing
+    ) {
 
+        return ApiResponse.ok(eventsService.getDetailsWithSessions(existing));
+    }
 }
