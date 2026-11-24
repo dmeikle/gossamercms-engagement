@@ -31,4 +31,5 @@ public class EventTicketTypeListResponse {
     private Instant salesEndAt;
     private String status;
     private Boolean isVisible;
+    private String ticketTypeName;
 }

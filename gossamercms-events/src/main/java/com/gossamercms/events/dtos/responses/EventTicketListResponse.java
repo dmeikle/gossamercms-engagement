@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -15,9 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class EventTicketListResponse {
 
-    private UUID registrationId;
-    private Instant registeredAt;
-    private Instant cancelledAt;
     private UUID eventId;
     private String title;
     private String slug;
@@ -28,11 +26,36 @@ public class EventTicketListResponse {
     private String timezone;
     private String thumbnailImageUrl;
     private Boolean isFeatured;
-    private UUID ticketId;
-    private UUID ticketTypeId;
-    private String ticketNumber;
-    private String qrTokenHash;
-    private String status;
-    private Instant issuedAt;
-    private BigDecimal total;
+    private List<Ticket> tickets;
+    private List<Session> sessions;
+
+    public record Ticket(
+            UUID ticketId,
+            String orderNumber,
+            BigDecimal total,
+            String currency,
+            Instant paidAt,
+            String eventTicketTypeName,
+            String ticketTypeName,
+            UUID registrationId,
+            Instant registeredAt,
+            Instant cancelledAt,
+            UUID eventId,
+            UUID ticketTypeId,
+            String ticketNumber,
+            String qrTokenHash,
+            String status,
+            Instant issuedAt
+    ) {}
+
+    public record Session(
+            UUID id,
+            String title,
+            Instant startAt,
+            Instant endAt,
+            String timezone,
+            Integer sortOrder,
+            EventDetailWithSessionsResponse.EventLocationDto location,
+            List<Ticket> tickets
+    ) {}
 }

@@ -86,10 +86,12 @@ public class EventTicketTypesDbService extends BaseDbService<EventTicketType, Ev
     public ListResultset<EventTicketTypeListResponse> listTicketTypesByEvent(QueryOptions options) {
         DataSourceAdapter ds = dsManager.get(meta.datasourceKey());
         String sql = """
-                select ett.id, ett."eventId", "sessionId", es.title as "sessionTitle", name, ett.id as "ticketTypeId", price, currency, "quantityAvailable", "quantityReserved", "quantitySold",
-                  "minimumPerOrder", "maximumPerOrder", "salesStartAt", "salesEndAt", ett."status", "isVisible"
+                select ett.id, ett."eventId", ett."name", "sessionId", es.title as "sessionTitle", ett.id as "ticketTypeId", price, currency, "quantityAvailable", "quantityReserved", "quantitySold",
+                  "minimumPerOrder", "maximumPerOrder", "salesStartAt", "salesEndAt", ett."status", "isVisible",
+                  tt."name" as "ticketTypeName"
                   from event_ticket_types ett
                    inner join event_sessions es on es."id" = ett."sessionId"
+                   inner join ticket_types tt on tt.id = ett."ticketTypeId"
                 /*WHERE_CLAUSE*/
                 order by title
                 """;
@@ -113,11 +115,12 @@ public class EventTicketTypesDbService extends BaseDbService<EventTicketType, Ev
                 (rs, rownum) -> EventTicketTypeListResponse.builder()
                         .id(rs.getObject("id", UUID.class))
                         .currency(rs.getString("currency"))
+                        .name(rs.getString("name"))
                         .eventId(rs.getObject("eventId", UUID.class))
                         .sessionId(rs.getObject("sessionId", UUID.class))
                         .sessionTitle(rs.getString("sessionTitle"))
                         .ticketTypeId(rs.getObject("ticketTypeId", UUID.class))
-                        .name(rs.getString("name"))
+                        .ticketTypeName(rs.getString("ticketTypeName"))
                         .price(rs.getObject("price", BigDecimal.class))
                         .quantityAvailable(rs.getObject("quantityAvailable", Integer.class))
                         .quantityReserved(rs.getObject("quantityReserved", Integer.class))

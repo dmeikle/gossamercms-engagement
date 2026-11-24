@@ -1,6 +1,7 @@
 package com.gossamercms.events.adapters.inbound;
 
 import com.gossamercms.events.dtos.responses.EventTicketListResponse;
+import com.gossamercms.events.dtos.responses.EventTicketDetailResponse;
 import com.gossamercms.events.handlers.EventTicketsHandler;
 import com.gossamercms.mvc.controllers.TypedBaseController;
 import com.gossamercms.mvc.data.ListResultset;
@@ -84,7 +85,10 @@ class PublicEventControllersTest {
         Object dependency = mock(constructor.getParameterTypes()[0]);
         var handler = (BaseHandler<?, ?>) dependency;
         if (type == EventTicketsController.class) {
-            var listResponse = EventTicketListResponse.builder().ticketId(id).qrTokenHash("list-hash").build();
+            var ticket = new EventTicketListResponse.Ticket(id, null, null, null, null, null, null,
+                    null, null, null, null, null, null, "list-hash", null, null);
+            var listResponse = EventTicketListResponse.builder().eventId(id).tickets(List.of(ticket))
+                    .sessions(List.of()).build();
             doReturn(ListResultset.of(List.of(listResponse), 2, 10, 1))
                     .when((EventTicketsHandler) dependency).listByUserContext(any(QueryOptions.class));
         } else {
@@ -135,9 +139,11 @@ class PublicEventControllersTest {
                 .andExpect(jsonPath("$.data.list[0].createdAt").doesNotExist());
         var options = ArgumentCaptor.forClass(QueryOptions.class);
         if (type == EventTicketsController.class) {
-            listResult.andExpect(jsonPath("$.data.list[0].ticketId").value(id.toString()))
+            listResult.andExpect(jsonPath("$.data.list[0].eventId").value(id.toString()))
+                    .andExpect(jsonPath("$.data.list[0].tickets[0].ticketId").value(id.toString()))
                     .andExpect(jsonPath("$.data.list[0].id").doesNotExist())
-                    .andExpect(jsonPath("$.data.list[0].qrTokenHash").value("list-hash"));
+                    .andExpect(jsonPath("$.data.list[0].tickets[0].qrTokenHash").value("list-hash"))
+                    .andExpect(jsonPath("$.data.list[0].sessions").isArray());
             verify((EventTicketsHandler) dependency).listByUserContext(options.capture());
             assertEquals(Map.of("status", "active", "userContextId", userContextId), options.getValue().filters());
         } else {
@@ -149,15 +155,41 @@ class PublicEventControllersTest {
         assertEquals(2, options.getValue().page());
         assertEquals(10, options.getValue().size());
 
-        mvc.perform(get(path + "/" + id))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(id.toString()))
-                .andExpect(jsonPath("$.data.createdAt").doesNotExist())
-                .andExpect(jsonPath("$.data.qrTokenHash").doesNotExist());
+        if (type == EventTicketsController.class) {
+            var detail = EventTicketDetailResponse.builder()
+                    .ticketId(id).ticketNumber("T-123").eventTitle("Event").build();
+            doReturn(ListResultset.of(List.of(detail), 1, 1, 1))
+                    .when((EventTicketsHandler) dependency).getTicketDetails(id);
+            mvc.perform(get(path + "/" + id + "/detail"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.list[0].ticketId").value(id.toString()))
+                    .andExpect(jsonPath("$.data.list[0].ticketNumber").value("T-123"))
+                    .andExpect(jsonPath("$.data.list[0].eventTitle").value("Event"))
+                    .andExpect(jsonPath("$.data.list[0].qrTokenHash").doesNotExist());
+            verify((EventTicketsHandler) dependency).getTicketDetails(id);
+            mvc.perform(get(path + "/" + id)).andExpect(status().isNotFound());
+        } else {
+            mvc.perform(get(path + "/" + id))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.id").value(id.toString()))
+                    .andExpect(jsonPath("$.data.createdAt").doesNotExist())
+                    .andExpect(jsonPath("$.data.qrTokenHash").doesNotExist());
+        }
         mvc.perform(post(path)).andExpect(status().isMethodNotAllowed());
-        mvc.perform(put(path + "/" + id)).andExpect(status().isMethodNotAllowed());
-        mvc.perform(delete(path + "/" + id)).andExpect(status().isMethodNotAllowed());
+        if (type == EventTicketsController.class) {
+            mvc.perform(put(path + "/" + id)).andExpect(status().isNotFound());
+            mvc.perform(delete(path + "/" + id)).andExpect(status().isNotFound());
+            mvc.perform(put(path + "/" + id + "/detail")).andExpect(status().isMethodNotAllowed());
+            mvc.perform(delete(path + "/" + id + "/detail")).andExpect(status().isMethodNotAllowed());
+        } else {
+            mvc.perform(put(path + "/" + id)).andExpect(status().isMethodNotAllowed());
+            mvc.perform(delete(path + "/" + id)).andExpect(status().isMethodNotAllowed());
+        }
         mvc.perform(post(path + "/" + id + "/restore")).andExpect(status().isNotFound());
-        mvc.perform(post(path + "/bulk")).andExpect(status().isMethodNotAllowed());
+        if (type == EventTicketsController.class) {
+            mvc.perform(post(path + "/bulk")).andExpect(status().isNotFound());
+        } else {
+            mvc.perform(post(path + "/bulk")).andExpect(status().isMethodNotAllowed());
+        }
     }
 }

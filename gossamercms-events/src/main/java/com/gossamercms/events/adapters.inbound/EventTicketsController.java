@@ -2,6 +2,7 @@ package com.gossamercms.events.adapters.inbound;
 
 import com.gossamercms.events.dtos.EventTicketDto;
 import com.gossamercms.events.dtos.requests.EventTicketRequest;
+import com.gossamercms.events.dtos.responses.EventTicketDetailResponse;
 import com.gossamercms.events.dtos.responses.EventTicketListResponse;
 import com.gossamercms.events.dtos.responses.EventTicketResponse;
 import com.gossamercms.events.handlers.EventTicketsHandler;
@@ -79,9 +80,8 @@ public class EventTicketsController extends TypedBaseController<
                                 .build()));
     }
 
-    @Override
-    @GetMapping("/{id}")
-    public ApiResponse<EventTicketResponse> getById(@PathVariable("id") EventTicketDto existing) {
-        return super.getById(existing);
+    @GetMapping("/{id}/detail")
+    public ApiResponse<ListResultset<EventTicketDetailResponse>> getDetailedById(@PathVariable("id") EventTicketDto existing) {
+        return ApiResponse.ok(((EventTicketsHandler) handler).getTicketDetails(existing.getId()));
     }
 }
